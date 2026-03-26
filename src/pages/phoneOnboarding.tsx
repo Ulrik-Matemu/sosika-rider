@@ -6,12 +6,14 @@ import {
 import type { ConfirmationResult } from "firebase/auth";
 import { auth, db } from "./../../firebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { useNavigate } from 'react-router-dom';
 
 const PhoneOnboarding: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState("+255"); 
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   
   // Use a ref to store the verifier to persist across re-renders
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
@@ -32,6 +34,8 @@ const PhoneOnboarding: React.FC = () => {
         }
       });
     }
+
+    
 
     // Cleanup on unmount
     return () => {
@@ -92,6 +96,8 @@ const PhoneOnboarding: React.FC = () => {
         }
         alert("Login Successful!");
         // Navigation logic for your PWA goes here (e.g., useNavigate to /upload)
+        navigate("/rider-id-form");
+
       }
     } catch (error) {
       console.error("Verification Error:", error);
@@ -100,6 +106,8 @@ const PhoneOnboarding: React.FC = () => {
       setLoading(false);
     }
   };
+
+  
 
   return (
     <div className="flex flex-col items-center justify-center p-6 min-h-screen bg-gray-50 font-sans">
