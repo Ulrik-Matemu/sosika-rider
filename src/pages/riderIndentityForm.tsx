@@ -12,7 +12,7 @@ const RiderIdentityForm: React.FC = () => {
 
   const CLOUDINARY_CLOUD_NAME = (import.meta as any).env.VITE_CLOUDINARY_CLOUD_NAME;
   const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-  const UPLOAD_PRESET = (import.meta as any).env.VITE_FIREBASE_API_KEY;
+  const UPLOAD_PRESET = (import.meta as any).env.VITE_CLOUDINARY_PRESET_NAME;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
