@@ -22,14 +22,90 @@ interface RiderData {
 
 export const Dashboard: React.FC = () => {
   // Replace with your actual auth/firestore logic
-  const [rider] = useState<RiderData | null>({
-    fullName: "Ulrik Matemu",
-    phoneNumber: "+255760903468",
-    plateNumber: "12345",
-    status: "pending_verification",
-    nidaNumber: "1234567",
-    selfieUrl: "https://res.cloudinary.com/db5isiex3/image/upload/v1774558346/rider_documents/btweshngwejzqtsxlnxk.jpg"
-  });
+const [rider, setRider] = useState<RiderData | null>(null);
+const [loading, setLoading] = useState(true);
+
+// Subscribe to auth state and to the rider document in Firestore.
+// This uses dynamic imports so you don't need to add top-level firebase imports here.
+React.useEffect(() => {
+    let unsubscribeAuth: (() => void) | null = null;
+    let unsubscribeDoc: (() => void) | null = null;
+    let mounted = true;
+
+    (async () => {
+        try {
+            const { getAuth, onAuthStateChanged, signOut: firebaseSignOut } = await import('firebase/auth');
+            const { getFirestore, doc, onSnapshot } = await import('firebase/firestore');
+
+            const auth = getAuth();
+            const db = getFirestore();
+
+            unsubscribeAuth = onAuthStateChanged(
+                auth,
+                (user) => {
+                    if (!mounted) return;
+                    if (!user) {
+                        setRider(null);
+                        setLoading(false);
+                        // If you want to navigate to a sign-in page, do it here.
+                        return;
+                    }
+
+                    // Listen for the rider document (assumes collection "riders" keyed by uid)
+                    const riderRef = doc(db, 'riders', user.uid);
+                    unsubscribeDoc = onSnapshot(
+                        riderRef,
+                        (snap) => {
+                            if (!mounted) return;
+                            const data = snap.data() as Partial<RiderData> | undefined;
+                            if (!data) {
+                                setRider(null);
+                                setLoading(false);
+                                return;
+                            }
+
+                            setRider({
+                                fullName: data.fullName ?? (user.displayName ?? ''),
+                                phoneNumber: data.phoneNumber ?? (user.phoneNumber ?? ''),
+                                plateNumber: data.plateNumber ?? '',
+                                status: (data.status as RiderData['status']) ?? 'pending_verification',
+                                nidaNumber: data.nidaNumber ?? '',
+                                selfieUrl: data.selfieUrl ?? (user.photoURL ?? ''),
+                            });
+                            setLoading(false);
+                        },
+                        (err) => {
+                            console.error('rider onSnapshot error', err);
+                            if (mounted) setLoading(false);
+                        }
+                    );
+                },
+                (err) => {
+                    console.error('onAuthStateChanged error', err);
+                    if (mounted) setLoading(false);
+                }
+            );
+
+            // Optional: attach signOut helper to window for quick testing (remove in production)
+            (window as any).__riderSignOut = async () => {
+                try {
+                    await firebaseSignOut(auth);
+                } catch (e) {
+                    console.error('signOut error', e);
+                }
+            };
+        } catch (e) {
+            console.error('Firebase dynamic import failed', e);
+            if (mounted) setLoading(false);
+        }
+    })();
+
+    return () => {
+        mounted = false;
+        if (unsubscribeDoc) unsubscribeDoc();
+        if (unsubscribeAuth) unsubscribeAuth();
+    };
+}, []);
 
   const getStatusStyles = (status: string) => {
     switch (status) {
@@ -41,6 +117,14 @@ export const Dashboard: React.FC = () => {
         return 'bg-slate-50 text-slate-700 border-slate-200';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-10 flex items-center justify-center">
+        <div className="text-slate-500">Loading…</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-10">
