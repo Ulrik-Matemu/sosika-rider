@@ -93,10 +93,18 @@ const PhoneOnboarding: React.FC = () => {
             status: "onboarding_incomplete",
             createdAt: new Date().toISOString(),
           });
+          alert("Login Successful! Please complete your identity form.");
+          navigate("/rider-id-form");
+        } else {
+          const userData = userDoc.data();
+          if (userData.status === "onboarding_incomplete") {
+            alert("Login Successful! Please complete your identity form.");
+            navigate("/rider-id-form");
+          } else {
+            alert("Login Successful! Welcome back.");
+            navigate("/dashboard"); // Navigate to dashboard for existing and verified users
+          }
         }
-        alert("Login Successful!");
-        // Navigation logic for your PWA goes here (e.g., useNavigate to /upload)
-        navigate("/rider-id-form");
 
       }
     } catch (error) {

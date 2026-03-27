@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { db, auth } from './../../firebaseConfig';
 import { doc, updateDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const RiderIdentityForm: React.FC = () => {
   const [uploading, setUploading] = useState(false);
@@ -9,6 +10,8 @@ const RiderIdentityForm: React.FC = () => {
     nidaNumber: '',
     plateNumber: '',
   });
+
+  const navigate = useNavigate();
 
   const CLOUDINARY_CLOUD_NAME = (import.meta as any).env.VITE_CLOUDINARY_CLOUD_NAME;
   const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
@@ -64,6 +67,7 @@ const RiderIdentityForm: React.FC = () => {
       });
 
       alert("Application submitted! We will verify your account shortly.");
+      navigate('/dashboard');
       // Redirect to a 'Waiting' or 'Profile' screen
     } catch (error) {
       console.error("Upload Error:", error);
