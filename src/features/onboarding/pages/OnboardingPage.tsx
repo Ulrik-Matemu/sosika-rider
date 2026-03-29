@@ -1,5 +1,6 @@
 import { startTransition, useMemo, useState } from 'react';
 import { CheckCircle2, ChevronRight, FileUp, RefreshCcw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { AppShell } from '../../../components/layout/AppShell';
 import { StatusBanner } from '../../../components/ui/StatusBanner';
 import type { RiderDocumentKind, RiderSession } from '../../../types/rider';
@@ -16,6 +17,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
   const { rider } = session;
   const [step, setStep] = useState<RiderSession['rider']['onboardingStep']>(rider.onboardingStep);
   const [submissionNote, setSubmissionNote] = useState('');
+  const navigate = useNavigate();
   const {
     canResubmit,
     documentDraft,
@@ -47,21 +49,29 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
       title="Rider onboarding"
       subtitle="Complete your freelance rider profile. Your account only becomes operational after approval."
       headerAction={
-        <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
+        <div className="rounded-full border border-white/10 bg-white/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
           {rider.profileCompletionPercent}% complete
         </div>
       }
     >
       <div className="space-y-5">
+        <section className="overflow-hidden rounded-[32px] border border-white/10 bg-[#111111] p-5 text-white shadow-[0_28px_100px_rgba(0,0,0,0.38)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/45">Onboarding</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">Professional rider profile</h2>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-white/65">
+            Keep the flow clean: complete the required profile details, upload clear images, review everything once, then submit.
+          </p>
+        </section>
+
         <StatusBanner status={rider.verificationStatus} reviewNotes={rider.reviewNotes} suspensionReason={rider.suspensionReason} />
         <StepIndicator currentStep={step} />
 
-        <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
+        <section className="rounded-[28px] border border-black/10 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:p-6">
           {step === 'personal_info' ? (
             <div className="space-y-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Step 1</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-950">Personal information</h2>
+                <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-950">Personal information</h2>
               </div>
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-slate-700">Full name</span>
@@ -69,7 +79,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   disabled={!editable}
                   value={draft.fullName}
                   onChange={(event) => updateField('fullName', event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-400 focus:bg-white disabled:cursor-not-allowed"
+                  className="w-full rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
                 />
                 {fieldErrors.fullName ? <span className="text-sm text-rose-600">{fieldErrors.fullName}</span> : null}
               </label>
@@ -79,7 +89,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   disabled={!editable}
                   value={draft.nidaNumber}
                   onChange={(event) => updateField('nidaNumber', event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-400 focus:bg-white disabled:cursor-not-allowed"
+                  className="w-full rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
                 />
                 {fieldErrors.nidaNumber ? <span className="text-sm text-rose-600">{fieldErrors.nidaNumber}</span> : null}
               </label>
@@ -91,7 +101,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                     const ok = await savePersonalInfo();
                     if (ok) gotoNextStep('vehicle_info');
                   }}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:bg-slate-400"
+                  className="inline-flex items-center gap-2 rounded-[20px] bg-[#111111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:bg-slate-400"
                 >
                   {isSaving ? 'Saving...' : 'Save and continue'}
                   <ChevronRight className="h-4 w-4" />
@@ -104,7 +114,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
             <div className="space-y-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Step 2</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-950">Vehicle information</h2>
+                <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-950">Vehicle information</h2>
               </div>
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-slate-700">Plate number</span>
@@ -112,7 +122,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   disabled={!editable}
                   value={draft.plateNumber}
                   onChange={(event) => updateField('plateNumber', event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-400 focus:bg-white disabled:cursor-not-allowed"
+                  className="w-full rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
                 />
                 {fieldErrors.plateNumber ? <span className="text-sm text-rose-600">{fieldErrors.plateNumber}</span> : null}
               </label>
@@ -122,7 +132,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   disabled={!editable}
                   value={draft.vehicleType}
                   onChange={(event) => updateField('vehicleType', event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-400 focus:bg-white disabled:cursor-not-allowed"
+                  className="w-full rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
                 />
               </label>
               {editable ? (
@@ -130,7 +140,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   <button
                     type="button"
                     onClick={() => gotoNextStep('personal_info')}
-                    className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="rounded-[20px] border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
                     Back
                   </button>
@@ -141,7 +151,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                       const ok = await saveVehicleInfo();
                       if (ok) gotoNextStep('documents');
                     }}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:bg-slate-400"
+                    className="inline-flex items-center gap-2 rounded-[20px] bg-[#111111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:bg-slate-400"
                   >
                     {isSaving ? 'Saving...' : 'Save and continue'}
                     <ChevronRight className="h-4 w-4" />
@@ -155,7 +165,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
             <div className="space-y-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Step 3</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-950">Document uploads</h2>
+                <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-950">Document uploads</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">Each document can be uploaded or replaced independently. Draft uploads are saved for later resume.</p>
               </div>
               {(['nidaImage', 'licenseImage', 'selfieImage'] as RiderDocumentKind[]).map((kind) => {
@@ -164,7 +174,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                 const uploadState = uploadStates[kind];
 
                 return (
-                  <div key={kind} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                  <div key={kind} className="rounded-[24px] border border-slate-200 bg-[#f6f6f3] p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-sm font-semibold text-slate-950">{fileLabel(kind)}</p>
@@ -181,7 +191,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                         accept="image/png,image/jpeg,image/webp"
                         capture={kind === 'selfieImage' ? 'user' : 'environment'}
                         onChange={(event) => selectFile(kind, event.target.files?.[0] ?? null)}
-                        className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-orange-100 file:px-4 file:py-2 file:font-semibold file:text-orange-700"
+                        className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-white file:px-4 file:py-2 file:font-semibold file:text-slate-900"
                       />
                       {uploadState.uploading ? (
                         <div className="space-y-2">
@@ -202,7 +212,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   <button
                     type="button"
                     onClick={() => gotoNextStep('vehicle_info')}
-                    className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="rounded-[20px] border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
                     Back
                   </button>
@@ -213,7 +223,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                       const ok = await saveDocuments();
                       if (ok) gotoNextStep('review');
                     }}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:bg-slate-400"
+                    className="inline-flex items-center gap-2 rounded-[20px] bg-[#111111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:bg-slate-400"
                   >
                     {isSaving ? 'Uploading...' : 'Save documents'}
                     <ChevronRight className="h-4 w-4" />
@@ -227,15 +237,15 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
             <div className="space-y-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Step 4</p>
-                <h2 className="mt-1 text-lg font-semibold text-slate-950">Review and submit</h2>
+                <h2 className="mt-1 text-xl font-semibold tracking-[-0.02em] text-slate-950">Review and submit</h2>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[24px] border border-slate-200 bg-[#f6f6f3] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Personal</p>
                   <p className="mt-3 text-sm text-slate-700">Full name: {session.rider.fullName || 'Not saved'}</p>
                   <p className="mt-1 text-sm text-slate-700">NIDA number: {documentDraft.nidaNumber || 'Not saved'}</p>
                 </div>
-                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-[24px] border border-slate-200 bg-[#f6f6f3] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Vehicle</p>
                   <p className="mt-3 text-sm text-slate-700">Plate number: {documentDraft.plateNumber || 'Not saved'}</p>
                   <p className="mt-1 text-sm text-slate-700">Vehicle type: {documentDraft.vehicleType || 'Not saved'}</p>
@@ -248,7 +258,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   value={submissionNote}
                   onChange={(event) => setSubmissionNote(event.target.value)}
                   rows={4}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-400 focus:bg-white disabled:cursor-not-allowed"
+                  className="w-full rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
                   placeholder="Add clarification if a document was replaced or reuploaded."
                 />
               </label>
@@ -257,7 +267,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   <button
                     type="button"
                     onClick={() => gotoNextStep('documents')}
-                    className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="rounded-[20px] border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
                     Back
                   </button>
@@ -267,21 +277,22 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                     onClick={async () => {
                       const ok = await submitForReview(submissionNote);
                       if (!ok) return;
+                      navigate('/dashboard');
                     }}
-                    className="rounded-2xl bg-orange-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:cursor-not-allowed disabled:bg-orange-300"
+                    className="rounded-[20px] bg-[#111111] px-5 py-3 text-sm font-semibold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:bg-slate-300"
                   >
                     {isSubmitting ? 'Submitting...' : canResubmit ? 'Submit for review' : 'Waiting for review'}
                   </button>
                 </div>
               ) : (
-                <div className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                <div className="rounded-[24px] border border-slate-200 bg-[#f6f6f3] px-4 py-4 text-sm text-slate-600">
                   This onboarding record is currently locked while operations handles the current status.
                 </div>
               )}
             </div>
           ) : null}
 
-          {formError ? <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{formError}</p> : null}
+          {formError ? <p className="mt-5 rounded-[20px] bg-rose-50 px-4 py-3 text-sm text-rose-700">{formError}</p> : null}
         </section>
 
         {(rider.verificationStatus === 'needs_resubmission' || rider.verificationStatus === 'rejected') && editable ? (

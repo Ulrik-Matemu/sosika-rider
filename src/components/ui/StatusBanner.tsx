@@ -3,13 +3,13 @@ import { STATUS_DESCRIPTIONS, STATUS_LABELS } from '../../constants/rider';
 import type { VerificationStatus } from '../../types/rider';
 
 const toneByStatus: Record<VerificationStatus, string> = {
-  draft: 'border-slate-200 bg-white text-slate-700',
-  submitted: 'border-amber-200 bg-amber-50 text-amber-900',
-  under_review: 'border-amber-200 bg-amber-50 text-amber-900',
-  approved: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-  needs_resubmission: 'border-orange-200 bg-orange-50 text-orange-900',
-  rejected: 'border-rose-200 bg-rose-50 text-rose-900',
-  suspended: 'border-slate-900 bg-slate-950 text-white',
+  draft: 'border-black/10 bg-white text-slate-700',
+  submitted: 'border-amber-300/60 bg-[#fff7e7] text-[#704800]',
+  under_review: 'border-amber-300/60 bg-[#fff7e7] text-[#704800]',
+  approved: 'border-emerald-300/60 bg-[#eefbf3] text-[#0b6b32]',
+  needs_resubmission: 'border-orange-300/60 bg-[#fff1ea] text-[#9a3412]',
+  rejected: 'border-rose-300/60 bg-[#fff0f1] text-[#a11a37]',
+  suspended: 'border-white/10 bg-[#111111] text-white',
 };
 
 function getStatusIcon(status: VerificationStatus) {
@@ -40,7 +40,7 @@ export function StatusBanner({
   suspensionReason?: string | null;
 }) {
   return (
-    <section className={`rounded-3xl border p-5 shadow-sm ${toneByStatus[status]}`}>
+    <section className={`rounded-[28px] border p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] ${toneByStatus[status]}`}>
       <div className="flex items-start gap-3">
         <div className="mt-0.5">{getStatusIcon(status)}</div>
         <div className="space-y-2">

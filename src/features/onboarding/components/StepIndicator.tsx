@@ -5,7 +5,7 @@ const orderedSteps = Object.entries(ONBOARDING_STEP_ORDER).sort((a, b) => a[1] -
 
 export function StepIndicator({ currentStep }: { currentStep: OnboardingStep }) {
   return (
-    <div className="grid grid-cols-4 gap-2 rounded-[2rem] border border-slate-200 bg-white p-3 shadow-sm">
+    <div className="grid grid-cols-2 gap-2 rounded-[28px] border border-black/10 bg-white p-2 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:grid-cols-4">
       {orderedSteps.map(([step, order]) => {
         const isActive = step === currentStep;
         const isComplete = order < ONBOARDING_STEP_ORDER[currentStep];
@@ -13,8 +13,8 @@ export function StepIndicator({ currentStep }: { currentStep: OnboardingStep }) 
         return (
           <div
             key={step}
-            className={`rounded-2xl px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.18em] ${
-              isActive ? 'bg-slate-950 text-white' : isComplete ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+            className={`rounded-[20px] px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.18em] ${
+              isActive ? 'bg-[#111111] text-white' : isComplete ? 'bg-[#edf8f1] text-emerald-700' : 'bg-[#f5f5f2] text-slate-500'
             }`}
           >
             {step.replace('_', ' ')}

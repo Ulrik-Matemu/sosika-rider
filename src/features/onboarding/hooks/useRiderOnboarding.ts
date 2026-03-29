@@ -139,10 +139,10 @@ export function useRiderOnboarding(session: RiderSession) {
     }
   }
 
-  async function uploadDocument(kind: RiderDocumentKind) {
+  async function uploadDocument(kind: RiderDocumentKind, baseDocumentDraft = documentDraft) {
     const file = selectedFiles[kind];
     if (!file) {
-      return true;
+      return baseDocumentDraft;
     }
 
     setUploadStates((current) => ({
@@ -167,39 +167,37 @@ export function useRiderOnboarding(session: RiderSession) {
         },
       });
 
+      const nextDocumentDraft = {
+        ...baseDocumentDraft,
+        [kind]: asset,
+        uploadMetadata: {
+          ...baseDocumentDraft.uploadMetadata,
+          [kind]: {
+            fileName: file.name,
+            bytes: file.size,
+            mimeType: file.type,
+            uploadedAt: new Date().toISOString(),
+          },
+        },
+      };
+
       await updateRiderDocumentsDraft(session.rider.uid, {
         [kind]: asset,
-        uploadMetadata: {
-          ...documentDraft.uploadMetadata,
-          [kind]: {
-            fileName: file.name,
-            bytes: file.size,
-            mimeType: file.type,
-            uploadedAt: new Date().toISOString(),
-          },
-        },
+        uploadMetadata: nextDocumentDraft.uploadMetadata,
       });
-
-      setDocumentDraft((current) => ({
-        ...current,
-        [kind]: asset,
-        uploadMetadata: {
-          ...current.uploadMetadata,
-          [kind]: {
-            fileName: file.name,
-            bytes: file.size,
-            mimeType: file.type,
-            uploadedAt: new Date().toISOString(),
-          },
-        },
-      }));
+      setDocumentDraft(nextDocumentDraft);
+      setSelectedFiles((current) => {
+        const next = { ...current };
+        delete next[kind];
+        return next;
+      });
 
       setUploadStates((current) => ({
         ...current,
         [kind]: { progress: 100, uploading: false, error: null },
       }));
 
-      return true;
+      return nextDocumentDraft;
     } catch (error) {
       setUploadStates((current) => ({
         ...current,
@@ -209,7 +207,7 @@ export function useRiderOnboarding(session: RiderSession) {
           error: error instanceof Error ? error.message : 'Upload failed.',
         },
       }));
-      return false;
+      return null;
     }
   }
 
@@ -219,15 +217,18 @@ export function useRiderOnboarding(session: RiderSession) {
 
     try {
       const kinds: RiderDocumentKind[] = ['nidaImage', 'licenseImage', 'selfieImage'];
+      let nextDocumentDraft = documentDraft;
+
       for (const kind of kinds) {
-        const ok = await uploadDocument(kind);
-        if (!ok) {
+        const updatedDocumentDraft = await uploadDocument(kind, nextDocumentDraft);
+        if (!updatedDocumentDraft) {
           setFormError('One or more uploads failed. Fix the highlighted document and try again.');
           return false;
         }
+        nextDocumentDraft = updatedDocumentDraft;
       }
 
-      const errors = validateDocumentCompleteness(documentDraft);
+      const errors = validateDocumentCompleteness(nextDocumentDraft);
       if (Object.keys(errors).length > 0) {
         setFieldErrors(errors);
         setFormError('Upload all required documents before continuing.');

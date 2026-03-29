@@ -2,8 +2,8 @@
 
 :root {
   color: #0f172a;
-  background: #f8fafc;
-  font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+  background: #0a0a0a;
+  font-family: Inter, "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -22,10 +22,17 @@ body,
 
 body {
   margin: 0;
+  background: #0a0a0a;
 }
 
 button,
 input,
 textarea {
   font: inherit;
+}
+
+input,
+textarea,
+button {
+  -webkit-tap-highlight-color: transparent;
 }
