@@ -79,7 +79,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   disabled={!editable}
                   value={draft.fullName}
                   onChange={(event) => updateField('fullName', event.target.value)}
-                  className="w-full rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
+                  className="w-full text-black rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
                 />
                 {fieldErrors.fullName ? <span className="text-sm text-rose-600">{fieldErrors.fullName}</span> : null}
               </label>
@@ -89,7 +89,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   disabled={!editable}
                   value={draft.nidaNumber}
                   onChange={(event) => updateField('nidaNumber', event.target.value)}
-                  className="w-full rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
+                  className="w-full text-black rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
                 />
                 {fieldErrors.nidaNumber ? <span className="text-sm text-rose-600">{fieldErrors.nidaNumber}</span> : null}
               </label>
@@ -122,7 +122,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   disabled={!editable}
                   value={draft.plateNumber}
                   onChange={(event) => updateField('plateNumber', event.target.value)}
-                  className="w-full rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
+                  className="w-full text-black rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
                 />
                 {fieldErrors.plateNumber ? <span className="text-sm text-rose-600">{fieldErrors.plateNumber}</span> : null}
               </label>
@@ -132,7 +132,7 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
                   disabled={!editable}
                   value={draft.vehicleType}
                   onChange={(event) => updateField('vehicleType', event.target.value)}
-                  className="w-full rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
+                  className="w-full text-black rounded-[20px] border border-slate-200 bg-[#f6f6f3] px-4 py-3 outline-none focus:border-slate-950 focus:bg-white disabled:cursor-not-allowed"
                 />
               </label>
               {editable ? (
