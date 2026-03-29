@@ -14,6 +14,10 @@ function getDefaultRoute(status: string) {
   return '/dashboard';
 }
 
+function shouldStayInOnboarding(status: string) {
+  return status === 'draft' || status === 'needs_resubmission' || status === 'rejected';
+}
+
 function AppRoutes() {
   const { authUser, riderSession, isLoading, error, signOutCurrentUser } = useAuthSession();
   const { notification } = usePushNotifications(authUser);
@@ -35,14 +39,24 @@ function AppRoutes() {
   }
 
   const defaultRoute = getDefaultRoute(riderSession.rider.verificationStatus);
+  const onboardingRequired = shouldStayInOnboarding(riderSession.rider.verificationStatus);
 
   return (
     <Routes>
       <Route path="/" element={<Navigate to={defaultRoute} replace />} />
-      <Route path="/onboarding" element={<OnboardingPage session={riderSession} />} />
+      <Route
+        path="/onboarding"
+        element={onboardingRequired ? <OnboardingPage session={riderSession} /> : <Navigate to="/dashboard" replace />}
+      />
       <Route
         path="/dashboard"
-        element={<DashboardPage session={riderSession} onSignOut={signOutCurrentUser} notification={notification} />}
+        element={
+          onboardingRequired ? (
+            <Navigate to="/onboarding" replace />
+          ) : (
+            <DashboardPage session={riderSession} onSignOut={signOutCurrentUser} notification={notification} />
+          )
+        }
       />
       <Route path="*" element={<Navigate to={defaultRoute} replace />} />
     </Routes>
