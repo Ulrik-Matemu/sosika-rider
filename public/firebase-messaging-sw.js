@@ -1,6 +1,8 @@
 // public/firebase-messaging-sw.js
-// Give the service worker access to Firebase SDK
-importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'); // Use compat versions
+// Keep this config aligned with the same Firebase project used by the web app.
+// Vite env vars are not injected into files under /public, so this file must be
+// updated manually when the Firebase project changes.
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
 // Initialize the Firebase app in the service worker by reusing the config from your main app
@@ -20,13 +22,17 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload.notification?.title || 'Sosika Rider';
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/icons/144x144.png' // Optional: path to an icon for the notification
+    body: payload.notification?.body || 'You have a new rider update.',
+    icon: '/icons/144x144.png',
+    data: payload.data || {},
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(clients.openWindow('/dashboard'));
 });

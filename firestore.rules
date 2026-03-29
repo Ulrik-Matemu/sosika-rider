@@ -1,0 +1,208 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function riderCreateKeysAreValid() {
+      return request.resource.data.keys().hasOnly([
+        'uid',
+        'phoneNumber',
+        'role',
+        'fullName',
+        'verificationStatus',
+        'onboardingStep',
+        'profileCompletionPercent',
+        'isSuspended',
+        'availabilityState',
+        'suspensionReason',
+        'reviewNotes',
+        'currentAppVersion',
+        'createdAt',
+        'updatedAt',
+      ]);
+    }
+
+    function riderClientDraftKeysAreValid() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'fullName',
+        'onboardingStep',
+        'profileCompletionPercent',
+        'currentAppVersion',
+        'updatedAt',
+      ]);
+    }
+
+    function riderClientSubmitKeysAreValid() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'verificationStatus',
+        'onboardingStep',
+        'profileCompletionPercent',
+        'submittedAt',
+        'currentAppVersion',
+        'updatedAt',
+      ]);
+    }
+
+    function riderClientAvailabilityKeysAreValid() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'availabilityState',
+        'updatedAt',
+      ]);
+    }
+
+    function documentsCreateKeysAreValid() {
+      return request.resource.data.keys().hasOnly([
+        'uid',
+        'nidaNumber',
+        'plateNumber',
+        'vehicleType',
+        'nidaImage',
+        'licenseImage',
+        'selfieImage',
+        'uploadMetadata',
+        'resubmissionCount',
+        'lastSubmittedAt',
+        'createdAt',
+        'updatedAt',
+      ]);
+    }
+
+    function documentsUpdateKeysAreValid() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'nidaNumber',
+        'plateNumber',
+        'vehicleType',
+        'nidaImage',
+        'licenseImage',
+        'selfieImage',
+        'uploadMetadata',
+        'resubmissionCount',
+        'lastSubmittedAt',
+        'updatedAt',
+      ]);
+    }
+
+    function riderPresenceKeysAreValid() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'isOnline',
+        'availabilityState',
+        'lastSeenAt',
+        'lat',
+        'lng',
+        'heading',
+        'speed',
+        'batteryLevel',
+        'networkStatus',
+        'activeDeliveryType',
+        'updatedAt',
+      ]);
+    }
+
+    function canSubmitOnboarding() {
+      return resource.data.verificationStatus in ['draft', 'needs_resubmission', 'rejected']
+        && request.resource.data.verificationStatus == 'submitted'
+        && request.resource.data.onboardingStep == 'review'
+        && request.resource.data.profileCompletionPercent == 100;
+    }
+
+    function canToggleAvailability(uid) {
+      return get(/databases/$(database)/documents/riders/$(uid)).data.verificationStatus == 'approved'
+        && get(/databases/$(database)/documents/riders/$(uid)).data.isSuspended == false;
+    }
+
+    match /riders/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+
+      // Riders can safely create their own shell document after auth.
+      allow create: if isSelf(uid)
+        && riderCreateKeysAreValid()
+        && request.resource.data.uid == uid
+        && request.resource.data.role == 'rider'
+        && request.resource.data.verificationStatus == 'draft'
+        && request.resource.data.onboardingStep == 'personal_info'
+        && request.resource.data.isSuspended == false;
+
+      // Client-side draft saves cannot touch approval, rejection, or suspension fields.
+      allow update: if isSelf(uid) && (
+          riderClientDraftKeysAreValid()
+          ||
+          (riderClientSubmitKeysAreValid() && canSubmitOnboarding())
+          ||
+          (riderClientAvailabilityKeysAreValid()
+            && canToggleAvailability(uid)
+            && request.resource.data.availabilityState in ['online', 'offline'])
+        )
+        || isAdmin();
+
+      allow delete: if false;
+    }
+
+    match /rider_documents/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+
+      // Riders own their document package, but only within the allowed onboarding fields.
+      allow create: if isSelf(uid)
+        && documentsCreateKeysAreValid()
+        && request.resource.data.uid == uid;
+
+      allow update: if (isSelf(uid) && documentsUpdateKeysAreValid()) || isAdmin();
+      allow delete: if false;
+    }
+
+    match /rider_presence/{uid} {
+      allow read: if isSelf(uid) || isAdmin();
+
+      allow create: if isSelf(uid) && request.resource.data.uid == uid;
+
+      // Presence can be updated by the rider, but online dispatch presence is only valid once approved.
+      allow update: if (isSelf(uid)
+          && riderPresenceKeysAreValid()
+          && (
+            request.resource.data.isOnline == false
+            || canToggleAvailability(uid)
+          ))
+        || isAdmin();
+
+      allow delete: if false;
+    }
+
+    match /rider_review_logs/{uid}/events/{eventId} {
+      allow read: if isSelf(uid) || isAdmin();
+
+      // Riders can only append their own submission/resubmission events.
+      allow create: if isSelf(uid)
+        && request.resource.data.keys().hasOnly(['action', 'actor', 'note', 'timestamp'])
+        && request.resource.data.action in ['submitted', 'resubmitted']
+        && request.resource.data.actor.type == 'rider'
+        && request.resource.data.actor.uid == uid;
+
+      allow update, delete: if isAdmin();
+    }
+
+    match /rider_notification_tokens/{tokenId} {
+      allow read: if isAdmin();
+
+      // Deterministic token ids avoid duplicate token spam from the same browser token.
+      allow create, update: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.platform == 'web';
+
+      allow delete: if isAdmin();
+    }
+
+    match /rider_notifications/{notificationId} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
