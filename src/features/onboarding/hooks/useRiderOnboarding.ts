@@ -10,13 +10,36 @@ interface UploadState {
   error: string | null;
 }
 
+interface RiderOnboardingController {
+  canResubmit: boolean;
+  draft: {
+    fullName: string;
+    nidaNumber: string;
+    plateNumber: string;
+    vehicleType: string;
+  };
+  fieldErrors: Record<string, string>;
+  formError: string | null;
+  isSaving: boolean;
+  isSubmitting: boolean;
+  selectedFiles: Partial<Record<RiderDocumentKind, File>>;
+  uploadStates: Record<RiderDocumentKind, UploadState>;
+  documentDraft: RiderSession['documents'];
+  updateField: (name: 'fullName' | 'nidaNumber' | 'plateNumber' | 'vehicleType', value: string) => void;
+  selectFile: (kind: RiderDocumentKind, file: File | null) => void;
+  savePersonalInfo: () => Promise<boolean>;
+  saveVehicleInfo: () => Promise<boolean>;
+  saveDocuments: () => Promise<boolean>;
+  submitForReview: (note?: string) => Promise<boolean>;
+}
+
 const emptyUploadState: UploadState = {
   progress: 0,
   uploading: false,
   error: null,
 };
 
-export function useRiderOnboarding(session: RiderSession) {
+export function useRiderOnboarding(session: RiderSession): RiderOnboardingController {
   const [draft, setDraft] = useState({
     fullName: session.rider.fullName,
     nidaNumber: session.documents.nidaNumber,

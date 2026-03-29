@@ -20,7 +20,6 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
   const navigate = useNavigate();
   const {
     canResubmit,
-    documentDraft,
     draft,
     fieldErrors,
     formError,
@@ -35,6 +34,9 @@ export function OnboardingPage({ session }: { session: RiderSession }) {
     saveDocuments,
     submitForReview,
   } = useRiderOnboarding(session);
+
+  // derive documentDraft from draft when the hook does not return a separate documentDraft
+  const documentDraft = useMemo(() => draft as unknown as Record<string, any>, [draft]);
 
   const hasLockedStatus = useMemo(() => rider.verificationStatus === 'submitted' || rider.verificationStatus === 'under_review' || rider.verificationStatus === 'approved' || rider.verificationStatus === 'suspended', [rider.verificationStatus]);
 
